@@ -16,8 +16,6 @@ class Render:
                     color = (255,255,255)
                 elif cell == "dirt":
                     color = (168,112,78)
-                elif cell == "rock":
-                    color = (100,100,100)
                 else:
                     color = (255,0,0)
                 
@@ -33,4 +31,7 @@ class Render:
         
         #Draw nats
         for ant in env.ants:
-            pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)),3)
+            pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)), ant.radius)
+        #Draw rocks
+        for rock in env.rocks:
+            pygame.draw.circle(self.screen, (100, 100, 100), (int(rock.x), int(rock.y)), rock.radius)

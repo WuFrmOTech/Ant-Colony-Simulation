@@ -10,36 +10,33 @@ class Environment:
         self.width = width 
         self.height = height
 
-        #Screen
+        # Screen
         self.origin_x = width // 2
         self.origin_y = height // 2
 
-        #Grid 
+        # Grid
         self.cols = 50
         self.rows = 40
 
-        #Size of each cell in pixels
-        self.col_width = width//self.cols
-        self.row_height = height//self.rows
+        # Size of each cell in pixels
+        self.col_width = width // self.cols
+        self.row_height = height // self.rows
         self.grid = self.create_grid()
 
-        #Entry point 
+        # Entry point
         self.create_entry()
-        
-        #Ants 
-        self.ants = [Ant(self.entry_col * self.col_width + self.col_width // 2, 
-                         self.entry_row * self.row_height + self.row_height // 2) 
-                         for _ in range(10)]
 
-        
-        #Rocks
+        # Ants
+        spawn_x = self.entry_col * self.col_width + self.col_width // 2
+        spawn_y = self.entry_row * self.row_height + self.row_height // 2
+        self.ants = [Ant(spawn_x, spawn_y) for _ in range(10)]
+
+        # Rocks
         self.rocks = []
-        self.create_rocks(8)
-    
+        self.create_rocks(10)
+
     '''
     Creates the base environment grid.
-    Top rows = EMPTY (surface area / nest entrance)
-    Bottom rows = DIRT (area to excavate)
     '''
     def create_grid(self):
         grid = []
@@ -49,54 +46,52 @@ class Environment:
                 grid_row.append("dirt")
             grid.append(grid_row)
         return grid
-    
+
     '''
-    Randomly places a fixed number of rocks in the grid.
-    Each rock is 2x2 cells.
+    Randomly places circular rocks in the environment.
     '''
     def create_rocks(self, num_rocks):
         rocks = 0
         while rocks < num_rocks:
-            #Random top-left position for the rock
-            #-3 ensures the 2x2 rock fits inside bounds
-            start_row = random.randint(0,self.rows-3)
-            start_col = random.randint(0,self.cols-3)
+            radius = 40
 
-            #Only place rock if space is valid
-            if self.can_place(start_row, start_col):
-                rock = Rock(start_row, start_col)
+            x = random.randint(radius, self.width - radius)
+            y = random.randint(radius, self.height - radius)
+
+            if self.can_place_rock(x, y, radius):
+                rock = Rock(x, y, radius)
                 self.rocks.append(rock)
-                #Place rock if dirt 
-                self.place_rock(rock)
-                rocks += 1 
+                rocks += 1
 
     '''
-    Checks if a 2x2 rock can be placed at a given location.
-    Ensures:
-    no overlap with other rocks and no placement in an empty space
+    Checks whether a circular rock can be placed.
+    Prevents overlap with the entry point and other rocks.
     '''
-    def can_place(self,start_row, start_col):
-        for row in range(start_row, start_row+2):
-            for col in range(start_col, start_col+2):
-                #If any cell is not DIRT, placement is invalid
-                if self.grid[row][col] != "dirt":
-                    return False
-        return True 
-    
-    '''
-    Converts the cells covered by the rock into rock.
-    '''
-    def place_rock(self, rock):
-        for row in range(rock.row, rock.row + rock.height):
-            for col in range(rock.col, rock.col + rock.width):
-                self.grid[row][col] = "rock"
+    def can_place_rock(self, x, y, radius):
+        # Keep rocks away from the entry point
+        dx = x - self.origin_x
+        dy = y - self.origin_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+
+        if distance < radius + 40:
+            return False
+
+        # Prevent overlap with existing rocks
+        for rock in self.rocks:
+            dx = x - rock.x
+            dy = y - rock.y
+            distance = (dx ** 2 + dy ** 2) ** 0.5
+
+            if distance < radius + rock.radius:
+                return False
+        return True
 
     '''
     Creates an entry point for the environment and ants.
     '''
     def create_entry(self):
-        self.entry_col = self.origin_x//self.col_width
-        self.entry_row = self.origin_y//self.row_height
+        self.entry_col = self.origin_x // self.col_width
+        self.entry_row = self.origin_y // self.row_height
         self.entry_cell = (self.entry_row, self.entry_col)
 
         self.grid[self.entry_row][self.entry_col] = "empty"
@@ -105,5 +100,5 @@ class Environment:
     Update position for ants
     '''
     def update(self):
-        for ants in self.ants:
-            ants.random_walk(self)
+        for ant in self.ants:
+            ant.random_walk(self)
