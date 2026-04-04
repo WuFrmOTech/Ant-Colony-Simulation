@@ -13,18 +13,25 @@ class Environment:
         #Screen
         self.origin_x = width // 2
         self.origin_y = height // 2
-    
-        #Ants 
-        self.ants = [Ant(self.origin_x, self.origin_y)] 
 
         #Grid 
         self.cols = 50
         self.rows = 40
+
         #Size of each cell in pixels
         self.col_width = width//self.cols
         self.row_height = height//self.rows
         self.grid = self.create_grid()
 
+        #Entry point 
+        self.create_entry()
+        
+        #Ants 
+        self.ants = [Ant(self.entry_col * self.col_width + self.col_width // 2, 
+                         self.entry_row * self.row_height + self.row_height // 2) 
+                         for _ in range(10)]
+
+        
         #Rocks
         self.rocks = []
         self.create_rocks(8)
@@ -83,3 +90,20 @@ class Environment:
         for row in range(rock.row, rock.row + rock.height):
             for col in range(rock.col, rock.col + rock.width):
                 self.grid[row][col] = "rock"
+
+    '''
+    Creates an entry point for the environment and ants.
+    '''
+    def create_entry(self):
+        self.entry_col = self.origin_x//self.col_width
+        self.entry_row = self.origin_y//self.row_height
+        self.entry_cell = (self.entry_row, self.entry_col)
+
+        self.grid[self.entry_row][self.entry_col] = "empty"
+
+    '''
+    Update position for ants
+    '''
+    def update(self):
+        for ants in self.ants:
+            ants.random_walk(self)

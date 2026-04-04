@@ -33,4 +33,4 @@ class Render:
         
         #Draw nats
         for ant in env.ants:
-            pygame.draw.circle(self.screen, (255,255,255), (int(ant.x), int(ant.y)),3)
+            pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)),3)
