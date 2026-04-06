@@ -15,10 +15,16 @@ class Ant:
         self.weight_Capacity = weight_Capacity
         self.energy = energy
 
+        self.weight = 0
+        state = "searching"  # can be "searching", "returning", or "excavating"
+
         # Radius for drawing and circle-circle collision
         self.radius = 5
-        self.speed = 2
+        self.base_speed = 2
+        self.speed = self.base_speed
         self.choose_random_direction()
+
+        self.return_cooldown = 0
 
     '''
     Move based on velocity
@@ -33,14 +39,23 @@ class Ant:
 
     def pick_up(self, food):
         self.carrying_food = True
+        if self.weight < self.weight_Capacity:
+            self.weight += 1
+            self.carrying_dirt = True
 
     def drop(self):
         self.carrying_food = False
+        self.weight = 0
 
-    def update_energy(self, amount):
-        self.energy += amount
+    def update_energy(self):
+        cost = 0.1 + 0.05 * self.weight
+        self.energy -= cost
+
         if self.energy < 0:
             self.energy = 0
+
+    def update_speed(self):
+        self.speed = max(0.5, self.base_speed - 0.2 * self.weight)
 
     '''
     Choose a random direction using an angle.
@@ -106,17 +121,62 @@ class Ant:
         row, col = self.get_grid_pos(env)
 
         if 0 <= row < env.rows and 0 <= col < env.cols:
-            if env.grid[row][col] == "dirt":
+            if env.grid[row][col] == "dirt" and self.weight < self.weight_Capacity:
                 env.grid[row][col] = "empty"
                 self.carrying_dirt = True
+
+
+    def move_to_entry(self, env):
+        entry_x = env.origin_x
+        entry_y = env.origin_y
+
+        dx = entry_x - self.x
+        dy = entry_y - self.y
+        distance = math.sqrt(dx**2 + dy**2)
+
+        if distance > 0:
+            self.vx = self.speed * dx / distance
+            self.vy = self.speed * dy / distance
+
+        self.move_with_collision(env)
+
+        # If close to entry -> drop load + reset
+        if distance < 15:
+            self.drop()
+            self.energy = 100
+            self.state = "searching"
+
+            self.return_cooldown = 30   
+
+            self.choose_random_direction()
+
+            # FORCE movement away from center
+            self.x += self.vx * 5
+            self.y += self.vy * 5
+                
 
     '''
     Random walk for continuous movement.
     '''
     def random_walk(self, env):
-        #Small chance to change direction at each frame
-        if random.random() < 0.05:
-            self.choose_random_direction()
+        self.update_speed()
+        self.update_energy()
 
-        self.move_with_collision(env)
-        self.excavate(env)
+        # Reduce cooldown
+        if self.return_cooldown > 0:
+            self.return_cooldown -= 1
+
+        # Only allow returning if cooldown is done
+        if self.return_cooldown == 0:
+            if self.weight >= self.weight_Capacity or self.energy < 20:
+                self.state = "returning"
+
+        if self.state == "searching":
+            if random.random() < 0.05:
+                self.choose_random_direction()
+
+            self.move_with_collision(env)
+            self.excavate(env)
+
+        elif self.state == "returning":
+            self.move_to_entry(env)
