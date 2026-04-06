@@ -6,7 +6,7 @@ Creating the Ant class, which will represent the individual ants in the simulati
 Each ant has position, velocity, whether it is carrying food, and energy level.
 '''
 class Ant:
-    def __init__(self, x, y, vx=0, vy=0, carrying_dirt=False, weight_Capacity=0, energy=100):
+    def __init__(self, x, y, vx=0, vy=0, carrying_dirt=False, weight_Capacity=5, energy=100):
         self.x = x
         self.y = y
         self.vx = vx
@@ -16,7 +16,7 @@ class Ant:
         self.energy = energy
 
         self.weight = 0
-        state = "searching"  # can be "searching", "returning", or "excavating"
+        self.state = "searching"  # can be "searching", "returning", or "excavating"
 
         # Radius for drawing and circle-circle collision
         self.radius = 5
@@ -37,14 +37,13 @@ class Ant:
         self.vx = vx
         self.vy = vy
 
-    def pick_up(self, food):
-        self.carrying_food = True
+    def pick_up(self):
         if self.weight < self.weight_Capacity:
             self.weight += 1
             self.carrying_dirt = True
 
     def drop(self):
-        self.carrying_food = False
+        self.carrying_dirt = False
         self.weight = 0
 
     def update_energy(self):
@@ -123,7 +122,7 @@ class Ant:
         if 0 <= row < env.rows and 0 <= col < env.cols:
             if env.grid[row][col] == "dirt" and self.weight < self.weight_Capacity:
                 env.grid[row][col] = "empty"
-                self.carrying_dirt = True
+                self.pick_up()
 
 
     def move_to_entry(self, env):
