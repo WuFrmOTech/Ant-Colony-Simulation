@@ -27,11 +27,12 @@ class Render:
                 pygame.draw.rect(self.screen,color,(x, y, env.col_width, env.row_height))
 
         #Drwaw origin/entry point
-        pygame.draw.circle(self.screen, (0,255,0), (int(env.origin_x), int(env.origin_y)),30)
+        pygame.draw.circle(self.screen, (0,255,0), (int(env.home_x), int(env.home_y)),30)
         
         #Draw nats
         for ant in env.ants:
             pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)), ant.radius)
+            
         #Draw rocks
         for rock in env.rocks:
             pygame.draw.circle(self.screen, (100, 100, 100), (int(rock.x), int(rock.y)), rock.radius)

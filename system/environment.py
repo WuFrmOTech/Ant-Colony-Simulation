@@ -29,7 +29,7 @@ class Environment:
         # Ants
         spawn_x = self.entry_col * self.col_width + self.col_width // 2
         spawn_y = self.entry_row * self.row_height + self.row_height // 2
-        self.ants = [Ant(spawn_x, spawn_y) for _ in range(10)]
+        self.ants = [Ant(self.home_x, self.home_y, spawn_x, spawn_y) for _ in range(100)]
 
         # Rocks
         self.rocks = []
@@ -93,6 +93,10 @@ class Environment:
         self.entry_col = self.origin_x // self.col_width
         self.entry_row = self.origin_y // self.row_height
         self.entry_cell = (self.entry_row, self.entry_col)
+
+        #home is center of entry cell in pixel coordinates
+        self.home_x = self.entry_col * self.col_width + self.col_width // 2
+        self.home_y = self.entry_row * self.row_height + self.row_height // 2
 
         self.grid[self.entry_row][self.entry_col] = "empty"
 
