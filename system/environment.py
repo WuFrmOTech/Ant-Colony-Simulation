@@ -4,6 +4,7 @@ Stores everything for the simulation
 import random
 from entities.ant import Ant 
 from entities.rock import Rock
+from entities.food import Food 
 
 class Environment:
     def __init__(self, width, height):
@@ -34,6 +35,12 @@ class Environment:
         # Rocks
         self.rocks = []
         self.create_rocks(10)
+
+        # Food 
+        self.foods = []
+        self.create_food(3)
+        #state for ending the simulation
+        self.running = True
 
     '''
     Creates the base environment grid.
@@ -101,8 +108,59 @@ class Environment:
         self.grid[self.entry_row][self.entry_col] = "empty"
 
     '''
+    Randomly places circular food spots in the environment.
+    '''
+    def create_food(self, num_spots):
+        food_created = 0
+        radius = 20
+
+        while food_created < num_spots:
+            x = random.randint(radius, self.width - radius)
+            y = random.randint(radius, self.height - radius)
+
+            if self.can_place_food(x, y, radius):
+                self.foods.append(Food(x, y, radius))
+                food_created += 1 
+
+    '''
+    Checks whether a circular food spot can be placed.
+    Prevents overlap with the entry point and other rocks.
+    '''
+    def can_place_food(self, x, y, radius):
+        # Keep rocks away from the entry point
+        dx = x - self.origin_x
+        dy = y - self.origin_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+
+        if distance < radius + 40:
+            return False
+        
+        # Prevent overlap with existing rocks
+        for rock in self.rocks:
+            dx = x - rock.x
+            dy = y - rock.y
+            distance = (dx ** 2 + dy ** 2) ** 0.5
+
+            if distance < radius + rock.radius:
+                return False
+
+        # Prevent overlap with existing food spots
+        for food in self.foods:
+            dx = x - food.x
+            dy = y - food.y
+            distance = (dx ** 2 + dy ** 2) ** 0.5
+
+            if distance < radius + food.radius:
+                return False
+        return True
+    
+    '''
     Update position for ants
     '''
     def update(self):
         for ant in self.ants:
-            ant.random_walk(self)
+            ant.update(self)
+        
+        if all(food.found for food in self.foods):
+            self.running = False
+            print("All food spots found.")

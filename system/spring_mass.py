@@ -24,8 +24,8 @@ class SpringMassSystem:
         dy = y_m - y_a
         distance = math.sqrt(dx * dx + dy * dy)
 
-        if distance == 0:
-            return
+        if distance < 1e-6:
+            distance = 1e-6
 
         #Unit direction vector
         ux = dx / distance
@@ -64,7 +64,7 @@ class SpringMassSystem:
             ant.load_x += ant.load_vx * dt
             ant.load_y += ant.load_vy * dt
 
-        #Ant acceleration (equal and opposite force)
+        #Ant acceleration
         a_ax = -Fx / m_a
         a_ay = -Fy / m_a
 

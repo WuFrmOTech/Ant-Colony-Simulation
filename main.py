@@ -24,8 +24,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False 
+    
+    if env.running:
+        env.update()
 
-    env.update()
     renderer.draw(env)
     pygame.display.flip()
     clock.tick(60)

@@ -1,7 +1,7 @@
-import math 
+import math
 
 '''
-A helper class that handels the ants movement
+A helper class that handles the ants movement
 '''
 
 class MovementSystem:
@@ -15,7 +15,7 @@ class MovementSystem:
         distance = math.sqrt(dx * dx + dy * dy)
 
         return distance <= (self.radius + rock.radius)
-    
+
     '''
     Keep ants inside the screen.
     '''
@@ -32,7 +32,7 @@ class MovementSystem:
             collided = True
 
         return collided
-    
+
     '''
     Move the ant, but stop/redirect if rock collision.
     '''
@@ -41,16 +41,16 @@ class MovementSystem:
         new_x = self.x + self.vx
         new_y = self.y + self.vy
 
-        #irst check wall collision
-        if self.wall_collision(env, new_x, new_y):
+        # first check wall collision
+        if MovementSystem.wall_collision(self, env, new_x, new_y):
             return
 
-        #check rock collisions
+        # check rock collisions
         for rock in env.rocks:
-            if self.collides_with_rock(rock, new_x, new_y):
-                # Collision response: choose a new random direction 
+            if MovementSystem.collides_with_rock(self, rock, new_x, new_y):
+                # Collision response: choose a new random direction
                 self.choose_random_direction()
                 return
-            
+
         self.x = new_x
         self.y = new_y

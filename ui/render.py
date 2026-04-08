@@ -29,10 +29,15 @@ class Render:
         #Drwaw origin/entry point
         pygame.draw.circle(self.screen, (0,255,0), (int(env.home_x), int(env.home_y)),30)
         
-        #Draw nats
-        for ant in env.ants:
-            pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)), ant.radius)
-            
         #Draw rocks
         for rock in env.rocks:
             pygame.draw.circle(self.screen, (100, 100, 100), (int(rock.x), int(rock.y)), rock.radius)
+
+        #Draw food 
+        for food in env.foods:
+            if not food.found:
+                pygame.draw.circle(self.screen, (0,0,255), (int(food.x), int(food.y)), food.radius) 
+        
+        #Draw nats
+        for ant in env.ants:
+            pygame.draw.circle(self.screen, (255,0,0), (int(ant.x), int(ant.y)), ant.radius)
