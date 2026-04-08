@@ -93,14 +93,18 @@ class Ant:
         row = int(self.y // env.row_height)
         return row, col
 
-    def excavate(self, env):
-        row, col = self.get_grid_pos(env)
+    def excavate(self, env, x, y):
+        col = int(x // env.col_width)
+        row = int(y // env.row_height)
 
         if 0 <= row < env.rows and 0 <= col < env.cols:
             if env.grid[row][col] == "dirt":
                 env.grid[row][col] = "empty"
                 self.carrying_dirt = True
                 self.dirt_collected += 1
+
+                self.load_mass = self.base_load_mass + self.dirt_collected * self.mass_per_dirt
+
 
                 if self.dirt_collected >= self.max_dirt_capacity:
                     self.state = "returning"
@@ -124,7 +128,6 @@ class Ant:
                 if distance <= food.radius + self.radius:
                     food.found = True
                     print("Food found")    
-        self.excavate(env)
 
     '''
     Move to entry point
@@ -139,6 +142,7 @@ class Ant:
             self.y = self.home_y
             self.drop()
             self.dirt_collected = 0
+            self.load_mass = self.base_load_mass
             self.state = "searching"
             self.choose_random_direction()
             return
@@ -150,10 +154,12 @@ class Ant:
     '''
     Main method for ants 
     '''
-    def update(self, env):        
+    def update(self, env):  
+
+        SpringMassSystem.update(self)
+
         if self.state == "searching":
             self.random_walk(env)
         elif self.state == "returning":
             self.move_to_entry(env)
         
-        SpringMassSystem.update(self)
